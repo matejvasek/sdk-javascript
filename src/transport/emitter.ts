@@ -59,4 +59,7 @@ export class Emitter {
     }
     return emitter(event, options);
   }
+  static createSend(options: TransportOptions): (e: CloudEvent, opts?: TransportOptions) => Promise<AxiosResponse> {
+    return (e: CloudEvent, opts: TransportOptions = {}) => Emitter.send(e, { ...options, ...opts });
+  }
 }

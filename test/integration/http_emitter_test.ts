@@ -40,7 +40,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
   });
 
   describe("V1", () => {
-    const send = (e: CloudEvent, opts: TransportOptions = {}) => Emitter.send(e, { url: receiver, ...opts });
+    const send = Emitter.createSend({ url: receiver });
     const event = new CloudEvent({
       type,
       source,
@@ -133,7 +133,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
   });
 
   describe("V03", () => {
-    const send = (e: CloudEvent, opts: TransportOptions = {}) => Emitter.send(e, { url: receiver, ...opts });
+    const send = Emitter.createSend({ url: receiver });
     const event = new CloudEvent({
       specversion: Version.V03,
       type,
