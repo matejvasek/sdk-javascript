@@ -18,12 +18,12 @@ describe("The SDK Requirements", () => {
     expect(receiver instanceof Receiver).to.equal(true);
   });
 
-  it("should expose an Emitter type", () => {
-    const emitter = new Emitter({
-      url: "http://example.com",
-    });
-    expect(emitter instanceof Emitter).to.equal(true);
-  });
+  // it("should expose an Emitter type", () => {
+  //   const emitter = new Emitter({
+  //     url: "http://example.com",
+  //   });
+  //   expect(emitter instanceof Emitter).to.equal(true);
+  // });
 
   describe("v0.3", () => {
     it("should create an event using the right spec version", () => {

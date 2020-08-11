@@ -6,7 +6,7 @@ import CONSTANTS from "../../src/constants";
 const DEFAULT_CE_CONTENT_TYPE = CONSTANTS.DEFAULT_CE_CONTENT_TYPE;
 const DEFAULT_CONTENT_TYPE = CONSTANTS.DEFAULT_CONTENT_TYPE;
 
-import { CloudEvent, Version, Emitter, Protocol, headersFor } from "../../src";
+import { CloudEvent, Version, Emitter, Protocol, headersFor, TransportOptions } from "../../src";
 import { AxiosResponse } from "axios";
 
 const receiver = "https://cloudevents.io/";
@@ -40,7 +40,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
   });
 
   describe("V1", () => {
-    const emitter = new Emitter({ url: receiver });
+    const send = (e: CloudEvent, opts: TransportOptions = {}) => Emitter.send(e, { url: receiver, ...opts });
     const event = new CloudEvent({
       type,
       source,
@@ -52,8 +52,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
     });
 
     it("Sends a binary 1.0 CloudEvent by default", () =>
-      emitter
-        .send(event)
+      send(event)
         .then((response: AxiosResponse) => {
           // A binary message will have a ce-id header
           expect(response.data["content-type"]).to.equal(DEFAULT_CONTENT_TYPE);
@@ -78,8 +77,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
     });
 
     it("Sends a binary CloudEvent with Custom Headers", () =>
-      emitter
-        .send(event, { headers: { customheader: "value" } })
+      send(event, { headers: { customheader: "value" } })
         .then((response: { data: { [k: string]: string } }) => {
           // A binary message will have a ce-id header
           expect(response.data.customheader).to.equal("value");
@@ -92,8 +90,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
         .catch(expect.fail));
 
     it("Sends a structured 1.0 CloudEvent if specified", () =>
-      emitter
-        .send(event, { protocol: Protocol.HTTPStructured })
+      send(event, { protocol: Protocol.HTTPStructured })
         .then((response: { data: { [k: string]: string | Record<string, string>; data: { lunchBreak: string } } }) => {
           // A structured message will have a cloud event content type
           expect(response.data["content-type"]).to.equal(DEFAULT_CE_CONTENT_TYPE);
@@ -121,8 +118,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
           return [201, returnBody];
         });
 
-      return emitter
-        .send(event, { protocol: Protocol.HTTPStructured, url: `${receiver}alternate` })
+      return send(event, { protocol: Protocol.HTTPStructured, url: `${receiver}alternate` })
         .then((response: AxiosResponse) => {
           // A structured message will have a cloud event content type
           expect(response.data["content-type"]).to.equal(DEFAULT_CE_CONTENT_TYPE);
@@ -137,7 +133,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
   });
 
   describe("V03", () => {
-    const emitter = new Emitter({ url: receiver });
+    const send = (e: CloudEvent, opts: TransportOptions = {}) => Emitter.send(e, { url: receiver, ...opts });
     const event = new CloudEvent({
       specversion: Version.V03,
       type,
@@ -150,8 +146,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
     });
 
     it("Sends a binary 0.3 CloudEvent", () =>
-      emitter
-        .send(event)
+      send(event)
         .then((response: AxiosResponse) => {
           // A binary message will have a ce-id header
           expect(response.data[CONSTANTS.CE_HEADERS.ID]).to.equal(event.id);
@@ -175,8 +170,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
     });
 
     it("Sends a structured 0.3 CloudEvent if specified", () =>
-      emitter
-        .send(event, { protocol: Protocol.HTTPStructured })
+      send(event, { protocol: Protocol.HTTPStructured })
         .then(
           (response: {
             data: { [k: string]: string | Record<string, string>; specversion: string; data: { lunchBreak: string } };
@@ -208,8 +202,7 @@ describe("HTTP Transport Binding Emitter for CloudEvents", () => {
           return [201, returnBody];
         });
 
-      return emitter
-        .send(event, { protocol: Protocol.HTTPStructured, url: `${receiver}alternate` })
+      return send(event, { protocol: Protocol.HTTPStructured, url: `${receiver}alternate` })
         .then(
           (response: {
             data: { specversion: string; data: { lunchBreak: string }; [k: string]: string | Record<string, string> };

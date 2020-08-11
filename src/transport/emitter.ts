@@ -38,19 +38,6 @@ interface EmitterFunction {
  * @see https://github.com/cloudevents/spec/blob/v1.0/http-protocol-binding.md#13-content-modes
  */
 export class Emitter {
-  url?: string;
-  protocol: Protocol;
-  emitter: EmitterFunction;
-
-  constructor(options: TransportOptions = { protocol: Protocol.HTTPBinary }) {
-    this.protocol = options.protocol as Protocol;
-    this.url = options.url;
-    this.emitter = emitBinary;
-    if (this.protocol === Protocol.HTTPStructured) {
-      this.emitter = emitStructured;
-    }
-  }
-
   /**
    * Sends the {CloudEvent} to an event receiver over HTTP POST
    *
@@ -64,13 +51,12 @@ export class Emitter {
    * be overridden by providing a URL here.
    * @returns {Promise} Promise with an eventual response from the receiver
    */
-  send(event: CloudEvent, options?: TransportOptions): Promise<AxiosResponse> {
-    options = options || {};
-    options.url = options.url || this.url;
-    if (options.protocol != this.protocol) {
-      if (this.protocol === Protocol.HTTPBinary) return emitBinary(event, options);
-      return emitStructured(event, options);
+  static send(event: CloudEvent, options: TransportOptions): Promise<AxiosResponse> {
+    const { protocol } = options;
+    let emitter = emitBinary;
+    if (protocol === Protocol.HTTPStructured) {
+      emitter = emitStructured;
     }
-    return this.emitter(event, options);
+    return emitter(event, options);
   }
 }
